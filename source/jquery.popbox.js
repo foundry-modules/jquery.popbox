@@ -187,17 +187,6 @@ $.extend(Popbox.prototype, {
 		this.button.trigger(event, args);
 	},
 
-	toggle: function() {
-
-		var popbox = this;
-
-		if (popbox.enabled) {
-			popbox.hide();
-		} else {
-			popbox.show();
-		}
-	},
-
 	show: function() {
 
 		var popbox = this;
@@ -361,6 +350,11 @@ $.extend(Popbox.prototype, {
 			popbox.trigger("popboxDeactivate", [popbox]);
 
 		}, popbox.hideDelay);
+	},
+
+	widget: function() {
+
+		return this;
 	}
 });
 
@@ -368,15 +362,25 @@ $.extend(Popbox.prototype, {
 $(document)
 	.on('click.popbox', '[data-popbox]', function(){
 
-		$(this).popbox("toggle");
+		var popbox = $(this).popbox("widget");
+
+		if (popbox.enabled) {
+			popbox.hide();
+		} else {
+			popbox.show();
+		}
 	})
 	.on('mouseover.popbox', '[data-popbox]', function(){
 
-		$(this).popbox("show");
+		var popbox = $(this).popbox("widget");
+
+		if (popbox.toggle=="hover") popbox.show();
 	})
 	.on('mouseout.popbox', '[data-popbox]', function(){
 
-		$(this).popbox("hide");
+		var popbox = $(this).popbox("widget");
+
+		if (popbox.toggle=="hover") popbox.hide();
 	})
 	.on('mouseover.popbox.tooltip', '[data-popbox-tooltip]', function(){
 
@@ -404,4 +408,12 @@ $(document)
 
 		// Hide popbox
 		popbox.hide();
+ 	})
+ 	.on('click.popbox.close', '[data-popbox-close]', function(){
+
+ 		var popbox = Popbox.get($(this).parents('[data-popbox-tooltip]'));
+
+ 		if (!popbox) return;
+
+ 		popbox.hide();
  	});
