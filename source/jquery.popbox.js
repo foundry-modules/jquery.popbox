@@ -86,7 +86,7 @@ var Popbox = function(button, options) {
 
 // Default options
 Popbox.defaultOptions = {
-	loader: $("<div data-popbox-tooltip-loader>Loading...</div>"),
+	loader: $('<div class="popover" data-popbox-loader></div>'),
 	tooltip: $(),
 	content: "",
 	enabled: false,
