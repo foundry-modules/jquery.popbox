@@ -2,12 +2,29 @@ $.popbox = function(){};
 
 $.popbox.defaultOptions = {
 	loader: $("<div data-popbox-tooltip-loader>Loading...</div>"),
+	tooltip: $(),
 	content: "",
+	enabled: false,
 	wait: false,
+	locked: true,
+	hide: null,
 	position: {
 		my: "center bottom",
 		at: "center top",
 		collision: "none none"
+	}
+};
+
+$.popbox.updateOptions = function(options) {
+
+	$.extend(true, this, options);
+
+	if (this.tooltipPosition) {
+		this.tooltipPosition.of = this.anchor;
+	}
+
+	if (this.loaderPosition) {
+		this.loaderPosition.of = this.anchor;
 	}
 };
 
@@ -22,48 +39,44 @@ $(document)
 	.on('mouseover.popbox', '[data-popbox]', function(event) {
 
 		var anchor = $(this),
+			popbox = anchor.data("popbox");
 
-			popbox = anchor.data("popbox"),
+			// If popbox is not initialized, create one.
+			if (!$.isPlainObject(popbox)) {
 
-			defaultOptions = function() {
+				var content = popbox;
 
-				return $.extend(true, {}, $.popbox.defaultOptions, {
-					anchor: anchor,
-					position: {
-						of: anchor
+				popbox = $.extend(true, {}, $.popbox.defaultOptions,
+					{
+						anchor: anchor,
+						position: {
+							of: anchor
+						},
+						content: content
 					}
-				});
+				);				
+
+				anchor.data("popbox", popbox);
 			};
 
 		// If we're waiting for module to resolve, stop.
-		if ($.isPlainObject(popbox)) {
-			if (popbox.wait) return;
-		}
+		if (popbox.wait) return;
 
-		if ($.isModule(popbox)) {
+		if ($.isModule(popbox.content)) {
 		
-			var moduleUrl = popbox,
+			popbox.enabled = true;
+			popbox.wait = true;
 
-				popbox = $.extend({}, defaultOptions(), {
-					enabled: true,
-					wait: true
-				});
-
-				anchor.data("popbox", popbox);
-
-			$.module(moduleUrl)
+			$.module(popbox.content)
 				.done(function(options){
 
 					// Popbox options
 					if ($.isPlainObject(options)) {
-
-						// Merge popbox options
-						$.extend(popbox, options);
+						$.popbox.updateOptions.call(popbox, options);
 					}
 
-					// Popbox initiator
+					// Callback that returns customized popbox options
 					if ($.isFunction(options)) {
-
 						popbox.content = options;
 					}
 
@@ -71,150 +84,137 @@ $(document)
 
 					// If popbox is still enabled, show tooltip.
 					if (popbox.enabled) {
-
 						anchor.trigger("mouseover.popbox");
 					}
 				});
-		}
-
-		if ($.isString(popbox)) {
-
-			popbox = $.extend({}, defaultOptions(), {content: popbox});
-
-			anchor.data("popbox", popbox);
-		}
-
-		// Flag this popbox as enabled
-		popbox.enabled = true;
-
-		// Stop any task that hides popover
-		clearTimeout(popbox.hideTask);
-
-		// If tooltip exists, just show tootip
-		if (popbox.tooltip) {
-
-			popbox.tooltip
-				.appendTo("body")
-				.position(popbox.position);
 
 			return;
 		}
 
-		// Determine tooltip content
-		var content = popbox.content;
+		// Enable popbox
+		popbox.enabled = true;
+
+		// Stop any task that hides popover
+		clearTimeout(popbox.hide);
+
+		// If tooltip exists, just show tootip
+		if (popbox.tooltip.length > 0) {
+
+			popbox.tooltip
+				.appendTo("body")
+				.position(popbox.tooltipPosition || popbox.position);
+
+			anchor.trigger("popboxActivate", [popbox, anchor]);
+
+			return;
+		}
 
 		// Unwrap tooltip content
-		if ($.isFunction(content) {
-			content = $.extend(popbox, popbox.content.call(popbox, anchor));
+		if ($.isFunction(popbox.content)) {
+
+			$.popbox.updateOptions.call(popbox, popbox.content.call(popbox, anchor));
 		}
 
-		// String content we'll just rewrap in deferred
-		// so we don't have to write the same code twice.
-		if ($.isString(content)) {
-			content = $.Deferred().resolve(content);
+		// String content we'll just rewrap in deferred.
+		if ($.isString(popbox.content)) {
+
+			popbox.content = $.Deferred().resolve(content);
 		}
 
-		if (content.state()=="pending") {
+		if (popbox.content.state()=="pending") {
 
 			popbox.loader
 				.appendTo("body")
 				.position(popbox.loaderPosition || popbox.position);
 		}
 
-		content
+		popbox.content
 			.done(function(html){
+
+				// If popbox already has a tooltip, stop.
+				if (popbox.tooltip.length > 0) return;
 
 				// If popbox is disabled, don't show it.
 				if (!popbox.enabled) return;
 
 				// Remove loading indicator
-				if (popbox.loader) {
-					popbox.loader.detach();	
-				}
+				popbox.loader.detach();
 				
 				var tooltip = $.buildHTML(html);
 
-				if (tooltip.filter("data-popbox-tooltip").length < 1) {
+				if (tooltip.filter("[data-popbox-tooltip]").length < 1) {
 
 					tooltip = 
-						// Create wrapper
-						$('<div data-popbox-tooltip></div>')
+						// Create wrapper and
+						$("<div data-popbox-tooltip></div>")
 							// append to body first because
 							.appendTo("body")
-							// we want any possible scripts within the
-							// tooltip content to execute when it is
-							// visible in DOM.
+							// we want any possible scripts within the tooltip
+							// content to execute when it is visible in DOM.
 							.append(tooltip);
 
 				} else {
 
-					// Just append the tooltip
-					tooltip.appendTo("body");
+					tooltip = tooltip.appendTo("body").filter("[data-popbox-tooltip]");
 				}
-
 				
-				tooltip
-					// Store a reference to the anchor
-					.data("anchor", anchor)
-					// Position tooltip
-					.position(popbox.tooltipPosition || popbox.position);
+				// Position & assign it back
+				popbox.tooltip = 
+					tooltip
+						// Store a reference to the popbox
+						.data("popbox", popbox)
+						// Position tooltip
+						.position(popbox.tooltipPosition || popbox.position);
 
-				// Assign it back
-				popbox.tooltip = tooltip;
+				anchor.trigger("popboxActivate", [popbox, anchor]);
+			})
+			.always(function(){
+
+				popbox.wait = false;
 			});
 	})
 	.on('mouseout.popbox', '[data-popbox]', function(event) {
 
 		var anchor = $(this),
-			popbox = $(this).data("popbox");
+			popbox = anchor.data("popbox");		
 
+		// Popbox not initialized yet, stop.
 		if (!$.isPlainObject(popbox)) return;
 
-		if (popbox.wait) return;
+		// Disable popbox
+		popbox.enabled = false;
 
-		// Trigger popboxDeactivate event
-		$(anchor).trigger("popboxDeactivate", [popbox, anchor]);
+		// Stop any previous hide task
+		clearTimeout(popbox.hide);
 
 		// Detach popbox loader
 		popbox.loader.detach();
 
-		// Flag popbox as disabled
-		popbox.enabled = false;				
+		popbox.hide = setTimeout(function(){
 
-		// If there's no tooltip yet, stop.
-		if (!popbox.tooltip) return;
+			if (popbox.locked) return;
 
-		popbox.hideTask = setTimeout(function(){
+			popbox.tooltip.detach();
 
-			// If we want to show the tooltip again, stop.
-			if (popbox.enabled) return;
-
-			// If tooltip is locked, stop.
-			if (!popbox.locked)  {
-
-				// Else hide tooltip
-				popbox.tooltip.detach();
-			}
+			// Trigger popboxDeactivate event
+			anchor.trigger("popboxDeactivate", [popbox, anchor]);
 
 		}, 100);
-
 	})
 	.on('mouseover.popbox.tooltip', '[data-popbox-tooltip]', function(){
 
-		var anchor = $(this).data("anchor"),
-			popbox = anchor.data("popbox");
+		var popbox = $(this).data("popbox");
 
-		// Lock popbox
 		popbox.locked = true;
+
+		clearTimeout(popbox.hide);
 	})
 	.on('mouseout.popbox.tooltip', '[data-popbox-tooltip]', function(){
 
-		var anchor = $(this).data("anchor"),
-			popbox = anchor.data("popbox");
+		var popbox = $(this).data("popbox");
 
-		// Unlock popbox
 		popbox.locked = false;
 
 		// Trigger hiding of popbox
-		anchor.trigger("mouseout.popbox");
-	});
+		popbox.anchor.trigger("mouseout.popbox");
+ 	});
