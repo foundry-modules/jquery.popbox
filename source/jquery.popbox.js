@@ -179,6 +179,14 @@ $.extend(Popbox.prototype, {
 		}
 	},
 
+	trigger: function(event, args) {
+
+		var popbox = this;
+
+		this.tooltip.trigger(event, args);
+		this.button.trigger(event, args);
+	},
+
 	toggle: function() {
 
 		var popbox = this;
@@ -235,8 +243,7 @@ $.extend(Popbox.prototype, {
 				.position(popbox.position.tooltip || popbox.position);
 
 			// Trigger popboxActivate event
-			popbox.button
-				.trigger("popboxActivate", [popbox]);
+			popbox.trigger("popboxActivate", [popbox]);
 
 			return;
 		}
@@ -319,8 +326,7 @@ $.extend(Popbox.prototype, {
 						.position(popbox.position.tooltip || popbox.position);
 
 				// Trigger popboxActivate event
-				popbox.button
-					.trigger("popboxActivate", [popbox]);
+				popbox.trigger("popboxActivate", [popbox]);
 			})
 			.fail(function(){
 
@@ -352,8 +358,7 @@ $.extend(Popbox.prototype, {
 				.detach();
 
 			// Trigger popboxDeactivate event
-			popbox.button
-				.trigger("popboxDeactivate", [popbox]);
+			popbox.trigger("popboxDeactivate", [popbox]);
 
 		}, popbox.hideDelay);
 	}
