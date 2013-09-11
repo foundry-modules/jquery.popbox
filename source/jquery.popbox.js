@@ -1,3 +1,15 @@
+/*
+<div 
+	data-popbox="module://popbox/options/exporter"
+	data-popbox-class="profile"
+	data-popbox-position="bottom-left"></div>
+
+<div class="popbox" data-popbox-tooltip>
+<div class="arrow"></div>
+<div class="popbox-content">
+</div>
+</div>
+*/
 
 $.fn.popbox = function(options) {
 
@@ -15,6 +27,7 @@ $.fn.popbox = function(options) {
 
 			// Or create a new popbox
 			} else {
+
 				popbox = new Popbox(button, options);
 			}
 		});
@@ -60,11 +73,15 @@ var Popbox = function(button, options) {
 
 	// Gather element options
 	var elementOptions = {},
-		content = button.attr("data-popbox"),
-		toggle  = button.attr("data-popbox-toggle");
-
-	if (content) elementOptions.content = content;
-	if (toggle)  elementOptions.toggle  = toggle;
+		content   = button.attr("data-popbox"),
+		toggle    = button.attr("data-popbox-toggle"),
+		position  = button.attr("data-popbox-position"),
+		classname = button.attr("data-popbox-class");
+		
+	if (content)   elementOptions.content   = content;
+	if (toggle)    elementOptions.toggle    = toggle;
+	if (classname) elementOptions.classname = classname;
+	if (position)  elementOptions.position  = position;
 
 	// Build final options
 	popbox.update(
@@ -72,11 +89,10 @@ var Popbox = function(button, options) {
 			{},
 			Popbox.defaultOptions,
 			{
-				uid: $.uid(),
-				button: button,
-				position: {
-					of: button
-				}
+				tooltip: $(),
+				loader : $('<div class="popbox loading" data-popbox-tooltip><div class="arrow"></div></div>'),
+				uid    : $.uid(),
+				button : button
 			},
 			elementOptions,
 			options
@@ -86,20 +102,16 @@ var Popbox = function(button, options) {
 
 // Default options
 Popbox.defaultOptions = {
-	loader: $('<div class="popover" data-popbox-loader></div>'),
-	tooltip: $(),
 	content: "",
+	id: null,
+	classname: "",
 	enabled: false,
 	wait: false,
 	locked: false,
 	hideTimer: null,
 	hideDelay: 50,
 	toggle: "hover",
-	position: {
-		my: "center bottom",
-		at: "center top",
-		collision: "none none"
-	}
+	position: "bottom"
 };
 
 Popbox.get = function(el) {
@@ -159,19 +171,54 @@ $.extend(Popbox.prototype, {
 			popbox.content = $.Deferred().resolve(popbox.content);
 		}
 
-		// If there's a custom tooltip position,
-		// ensure it is anchoring to the popbox.button.
-		var tooltipPosition = popbox.position.tooltip;
-		if (tooltipPosition) {
-			tooltipPosition.of = popbox.button;
+		// Classname
+		if (popbox.classname) {
+			popbox.classname = "popbox-" + popbox.classname;	
 		}
 
-		// If there's a custom loader position,
-		// ensure it is anchoring to the popbox.button.
-		var loaderPosition = popbox.position.loader;
-		if (loaderPosition) {
-			loaderPosition.of = popbox.button;
+		var position = popbox.position;
+
+		if ($.isString(position)) {
+
+			// Determine position
+			var pos = position.split("-"),
+				x1, y1, x2, y2;
+
+			switch (pos[0]) {
+
+				case "top":
+				case "bottom":
+					x1 = x2 = pos[1] || "center";
+					y1 = pos[0]=="top" ? "bottom-10" : "top+10";
+					y2 = pos[0]=="top" ? "top"       : "bottom";
+					break;
+
+				case "left":
+				case "right":
+					y1 = y2 = pos[1] || "center";
+					x1 = pos[0]=="left" ? "right-10" : "left+10";
+					x2 = pos[0]=="left" ? "left"     : "right";
+					classname = pos[0] + " " + pos[1];
+					break;
+			}
+
+			popbox.position = {
+				classname: position,
+				my: x1 + " " + y1,
+				at: x2 + " " + y2
+			};
 		}
+
+		$.extend(popbox.position, {
+			of: this.button,
+			collision: "none none"
+		});
+
+		// Popbox loader
+		popbox.loader
+			.attr("id", popbox.id)
+			.addClass(popbox.classname)
+			.addClass(popbox.position.classname);
 
 		// If popbox is enabled, show tooltip with new options.
 		if (popbox.enabled) {
@@ -229,7 +276,7 @@ $.extend(Popbox.prototype, {
 
 			popbox.tooltip
 				.appendTo("body")
-				.position(popbox.position.tooltip || popbox.position);
+				.position(popbox.position);
 
 			// Trigger popboxActivate event
 			popbox.trigger("popboxActivate", [popbox]);
@@ -260,7 +307,7 @@ $.extend(Popbox.prototype, {
 
 			popbox.loader
 				.appendTo("body")
-				.position(popbox.position.loader || popbox.position);
+				.position(popbox.position);
 		}
 
 		popbox.content
@@ -283,14 +330,22 @@ $.extend(Popbox.prototype, {
 
 				if (tooltip.filter("[data-popbox-tooltip]").length < 1) {
 
+					var content = tooltip;
+
 					tooltip = 
 						// Create wrapper and
-						$("<div data-popbox-tooltip></div>")
+						$('<div class="popbox" data-popbox-tooltip><div class="arrow"></div><div class="popbox-content" data-popbox-content></div></div>')
+							.attr("id", popbox.id)
+							.addClass(popbox.classname)
+							.addClass(popbox.position.classname)
 							// append to body first because
-							.appendTo("body")
-							// we want any possible scripts within the tooltip
-							// content to execute when it is visible in DOM.
-							.append(tooltip);
+							.appendTo("body");
+
+					// We want any possible scripts within the tooltip
+					// content to execute when it is visible in DOM.
+					tooltip
+						.find('[data-popbox-content]')
+						.append(content);
 
 				} else {
 
@@ -312,7 +367,7 @@ $.extend(Popbox.prototype, {
 						// and let tooltip has a reference back to popbox
 						.data("popbox", popbox)
 						// reposition tooltip
-						.position(popbox.position.tooltip || popbox.position);
+						.position(popbox.position);
 
 				// Trigger popboxActivate event
 				popbox.trigger("popboxActivate", [popbox]);
