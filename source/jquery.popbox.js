@@ -76,11 +76,11 @@ var Popbox = function(button, options) {
 		content   = button.attr("data-popbox"),
 		toggle    = button.attr("data-popbox-toggle"),
 		position  = button.attr("data-popbox-position"),
-		classname = button.attr("data-popbox-class");
+		type      = button.attr("data-popbox-type");
 		
 	if (content)   elementOptions.content   = content;
 	if (toggle)    elementOptions.toggle    = toggle;
-	if (classname) elementOptions.classname = classname;
+	if (type)      elementOptions.type      = type;
 	if (position)  elementOptions.position  = position;
 
 	// Build final options
@@ -104,7 +104,7 @@ var Popbox = function(button, options) {
 Popbox.defaultOptions = {
 	content: "",
 	id: null,
-	classname: "",
+	type: "",
 	enabled: false,
 	wait: false,
 	locked: false,
@@ -173,11 +173,6 @@ $.extend(Popbox.prototype, {
 			popbox.content = $.Deferred().resolve(popbox.content);
 		}
 
-		// Classname
-		if (popbox.classname) {
-			popbox.classname = "popbox-" + popbox.classname;	
-		}
-
 		var position = popbox.position;
 
 		if ($.isString(position)) {
@@ -218,8 +213,11 @@ $.extend(Popbox.prototype, {
 
 		// Popbox loader
 		popbox.loader
-			.attr("id", popbox.id)
-			.addClass(popbox.classname)
+			.attr({
+				"id": popbox.id,
+				"data-popbox-tooltip": popbox.type
+			})
+			.addClass("popbox-" + popbox.type)
 			.removeClass(popbox.positions)
 			.addClass(popbox.position.classname);
 
@@ -338,8 +336,11 @@ $.extend(Popbox.prototype, {
 					tooltip = 
 						// Create wrapper and
 						$('<div class="popbox" data-popbox-tooltip><div class="arrow"></div><div class="popbox-content" data-popbox-content></div></div>')
-							.attr("id", popbox.id)
-							.addClass(popbox.classname)
+							.attr({
+								"id": popbox.id,
+								"data-popbox-tooltip": popbox.type
+							})
+							.addClass("popbox-" + popbox.type)
 							.removeClass(popbox.positions)
 							.addClass(popbox.position.classname)
 							// append to body first because
