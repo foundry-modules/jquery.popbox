@@ -123,6 +123,8 @@ Popbox.get = function(el) {
 
 $.extend(Popbox.prototype, {
 
+	positions: "top top-left top-right bottom bottom-left bottom-right left left-top left-bottom right right-top right-bottom",
+
 	update: function(options) {
 
 		var popbox = this;
@@ -218,6 +220,7 @@ $.extend(Popbox.prototype, {
 		popbox.loader
 			.attr("id", popbox.id)
 			.addClass(popbox.classname)
+			.removeClass(popbox.positions)
 			.addClass(popbox.position.classname);
 
 		// If popbox is enabled, show tooltip with new options.
@@ -337,6 +340,7 @@ $.extend(Popbox.prototype, {
 						$('<div class="popbox" data-popbox-tooltip><div class="arrow"></div><div class="popbox-content" data-popbox-content></div></div>')
 							.attr("id", popbox.id)
 							.addClass(popbox.classname)
+							.removeClass(popbox.positions)
 							.addClass(popbox.position.classname)
 							// append to body first because
 							.appendTo("body");
