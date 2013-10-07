@@ -76,12 +76,14 @@ var Popbox = function(button, options) {
 		content   = button.attr("data-popbox"),
 		toggle    = button.attr("data-popbox-toggle"),
 		position  = button.attr("data-popbox-position"),
-		type      = button.attr("data-popbox-type");
-		
+		type      = button.attr("data-popbox-type")
+		id        = button.attr("data-popbox-id");
+
 	if (content)   elementOptions.content   = content;
 	if (toggle)    elementOptions.toggle    = toggle;
 	if (type)      elementOptions.type      = type;
 	if (position)  elementOptions.position  = position;
+	if (id)        elementOptions.id        = id;
 
 	// Build final options
 	popbox.update(
