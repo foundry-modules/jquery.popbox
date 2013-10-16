@@ -22,7 +22,7 @@ $.fn.popbox = function(options) {
 				popbox = Popbox.get(button);
 
 			// Update popbox options
-			if (!popbox) {
+			if (popbox) {
 				popbox.update(options);
 
 			// Or create a new popbox
