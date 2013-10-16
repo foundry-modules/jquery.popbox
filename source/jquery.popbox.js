@@ -125,7 +125,7 @@ Popbox.get = function(el) {
 
 $.extend(Popbox.prototype, {
 
-	positions: "top top-left top-right bottom bottom-left bottom-right left left-top left-bottom right right-top right-bottom",
+	positions: "top top-left top-right top-center bottom bottom-left bottom-right bottom-center left left-top left-bottom left-center right right-top right-bottom right-center",
 
 	update: function(options) {
 
@@ -188,29 +188,66 @@ $.extend(Popbox.prototype, {
 				case "top":
 				case "bottom":
 					x1 = x2 = pos[1] || "center";
-					y1 = pos[0]=="top" ? "bottom-10" : "top+10";
-					y2 = pos[0]=="top" ? "top"       : "bottom";
+					// y1 = pos[0]=="top" ? "bottom-10" : "top+10";
+					y1 = pos[0]=="top" ? "bottom" : "top";
+					y2 = pos[0]=="top" ? "top"    : "bottom";
 					break;
 
 				case "left":
 				case "right":
 					y1 = y2 = pos[1] || "center";
-					x1 = pos[0]=="left" ? "right-10" : "left+10";
-					x2 = pos[0]=="left" ? "left"     : "right";
-					classname = pos[0] + " " + pos[1];
+					// x1 = pos[0]=="left" ? "right-10" : "left+10";
+					x1 = pos[0]=="left" ? "right" : "left";
+					x2 = pos[0]=="left" ? "left"  : "right";
 					break;
 			}
 
 			popbox.position = {
 				classname: position,
 				my: x1 + " " + y1,
-				at: x2 + " " + y2
+				at: x2 + " " + y2,
+				using: function(coords, feedback) {
+
+					var tooltip   = $(this),
+						classname = popbox.position.classname,
+						top       = coords.top,
+						left      = coords.left;
+
+					switch (pos[0]) {
+
+						case "top":
+						case "bottom":
+							var vertical = feedback.vertical;
+							if (vertical==pos[0]) {
+								classname = classname.replace(/top|bottom/gi, (vertical=="top") ? "bottom" : "top");
+							}
+							top = (vertical=="top") ? top + 10 : top - 10;
+							break;
+
+						case "left":
+						case "right":
+							var horizontal = feedback.horizontal;
+							if (feedback.horizontal==pos[0]) {
+								classname = classname.replace(/left|right/gi, (feedback.horizontal=="left") ? "right" : "left");
+							}
+							left = (horizontal=="left") ? left + 10 : left - 10;
+							break;
+					}
+
+					tooltip
+						.css({
+							top : top  + 'px',
+							left: left + 'px'
+						})
+						.removeClass(popbox.positions)
+						.addClass(classname);
+				}
 			};
 		}
 
 		$.extend(popbox.position, {
 			of: this.button,
-			collision: "none none"
+			collision: "flip"
 		});
 
 		// Popbox loader
@@ -219,9 +256,7 @@ $.extend(Popbox.prototype, {
 				"id": popbox.id,
 				"data-popbox-tooltip": popbox.type
 			})
-			.addClass("popbox-" + popbox.type)
-			.removeClass(popbox.positions)
-			.addClass(popbox.position.classname);
+			.addClass("popbox-" + popbox.type);
 
 		// If popbox is enabled, show tooltip with new options.
 		if (popbox.enabled) {
@@ -343,8 +378,6 @@ $.extend(Popbox.prototype, {
 								"data-popbox-tooltip": popbox.type
 							})
 							.addClass("popbox-" + popbox.type)
-							.removeClass(popbox.positions)
-							.addClass(popbox.position.classname)
 							// append to body first because
 							.appendTo("body");
 
