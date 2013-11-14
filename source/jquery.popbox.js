@@ -85,6 +85,11 @@ var Popbox = function(button, options) {
 	if (position)  elementOptions.position  = position;
 	if (id)        elementOptions.id        = id;
 
+	// If popbox was set up via jQuery, the element may not
+	// have the data-popbox attribute. We need this attribute
+	// for click and hover events to work (and keep things DRY).
+	if (content===undefined) button.attr("data-popbox", "");
+
 	// Build final options
 	popbox.update(
 		$.extend(true,
@@ -110,6 +115,7 @@ Popbox.defaultOptions = {
 	enabled: false,
 	wait: false,
 	locked: false,
+	exclusive: false,
 	hideTimer: null,
 	hideDelay: 50,
 	toggle: "hover",
@@ -285,6 +291,20 @@ $.extend(Popbox.prototype, {
 		// Stop any task that hides popover
 		clearTimeout(popbox.hideTimer);
 
+		// If this popbox can only be shown exclusively,
+		// then hide other popbox.
+		if (popbox.exclusive) {
+
+			$("[data-popbox-tooltip]").each(function(){
+
+				var popbox = Popbox.get($(this));
+
+				if (!popbox) return;
+
+				popbox.hide();
+			});
+		}
+
 		// Hide when popbox is blurred
 		if (popbox.toggle=="click") {
 
@@ -420,7 +440,7 @@ $.extend(Popbox.prototype, {
 			});
 	},
 
-	hide: function() {
+	hide: function(force) {
 
 		var popbox = this;
 
@@ -433,9 +453,9 @@ $.extend(Popbox.prototype, {
 		// Detach popbox loader
 		popbox.loader.detach();
 
-		popbox.hideTimer = setTimeout(function(){
+		var hide = function(){
 
-			if (popbox.locked) return;
+			if (popbox.locked && !force) return;
 
 			// Detach tooltip
 			popbox.tooltip
@@ -444,7 +464,9 @@ $.extend(Popbox.prototype, {
 			// Trigger popboxDeactivate event
 			popbox.trigger("popboxDeactivate", [popbox]);
 
-		}, popbox.hideDelay);
+		}
+
+		popbox.hideTimer = setTimeout(hide, popbox.hideDelay);
 	},
 
 	widget: function() {
