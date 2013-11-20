@@ -76,7 +76,7 @@ var Popbox = function(button, options) {
 		content   = button.attr("data-popbox"),
 		toggle    = button.attr("data-popbox-toggle"),
 		position  = button.attr("data-popbox-position"),
-		type      = button.attr("data-popbox-type")
+		type      = button.attr("data-popbox-type"),
 		id        = button.attr("data-popbox-id");
 
 	if (content)   elementOptions.content   = content;
@@ -119,7 +119,8 @@ Popbox.defaultOptions = {
 	hideTimer: null,
 	hideDelay: 50,
 	toggle: "hover",
-	position: "bottom"
+	position: "bottom",
+	cache: true
 };
 
 Popbox.get = function(el) {
@@ -464,9 +465,17 @@ $.extend(Popbox.prototype, {
 			// Trigger popboxDeactivate event
 			popbox.trigger("popboxDeactivate", [popbox]);
 
+			if (!popbox.cache) {
+				popbox.destroy();
+			}
 		}
 
 		popbox.hideTimer = setTimeout(hide, popbox.hideDelay);
+	},
+
+	destroy: function() {
+
+		this.button.removeData("popbox");
 	},
 
 	widget: function() {
