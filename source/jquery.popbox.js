@@ -120,6 +120,7 @@ Popbox.defaultOptions = {
 	hideDelay: 50,
 	toggle: "hover",
 	position: "bottom",
+	collision: "flip",
 	cache: true
 };
 
@@ -253,8 +254,8 @@ $.extend(Popbox.prototype, {
 		}
 
 		$.extend(popbox.position, {
-			of: this.button,
-			collision: "flip"
+			of: popbox.button,
+			collision: popbox.collision
 		});
 
 		// Popbox loader
