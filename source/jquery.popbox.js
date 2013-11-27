@@ -76,6 +76,7 @@ var Popbox = function(button, options) {
 		content   = button.attr("data-popbox"),
 		toggle    = button.attr("data-popbox-toggle"),
 		position  = button.attr("data-popbox-position"),
+		collision = button.attr("data-popbox-collision"),
 		type      = button.attr("data-popbox-type"),
 		id        = button.attr("data-popbox-id");
 
@@ -83,6 +84,7 @@ var Popbox = function(button, options) {
 	if (toggle)    elementOptions.toggle    = toggle;
 	if (type)      elementOptions.type      = type;
 	if (position)  elementOptions.position  = position;
+	if (collision) elementOptions.collision = collision;
 	if (id)        elementOptions.id        = id;
 
 	// If popbox was set up via jQuery, the element may not
