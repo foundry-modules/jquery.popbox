@@ -1,5 +1,5 @@
 /*
-<div 
+<div
 	data-popbox="module://popbox/options/exporter"
 	data-popbox-class="profile"
 	data-popbox-position="bottom-left"></div>
@@ -40,8 +40,8 @@ $.fn.popbox = function(options) {
 
 		var button = $(this[0]),
 
-			// Create new popbox instance if 
-			// it hasn't been created yet		
+			// Create new popbox instance if
+			// it hasn't been created yet
 			popbox = Popbox.get(button) || new Popbox(button),
 
 			method = popbox[options],
@@ -133,6 +133,8 @@ Popbox.get = function(el) {
 	if (popbox instanceof Popbox) return popbox;
 }
 
+Popbox.toggleEvent = navigator.userAgent.match(/iPhone|iPad|iPod/i) ? "touchstart" : "click";
+
 $.extend(Popbox.prototype, {
 
 	positions: "top top-left top-right top-center bottom bottom-left bottom-right bottom-center left left-top left-bottom left-center right right-top right-bottom right-center",
@@ -146,7 +148,7 @@ $.extend(Popbox.prototype, {
 
 		// If popbox content is a module
 		if ($.isModule(popbox.content)) {
-		
+
 			// Don't let anything happen until module is resolved.
 			popbox.wait = true;
 
@@ -313,7 +315,7 @@ $.extend(Popbox.prototype, {
 		if (popbox.toggle=="click") {
 
 			var doc = $(document),
-				hideOnClick = "click.popbox." + popbox.uid;
+				hideOnClick = Popbox.toggleEvent + ".popbox." + popbox.uid;
 
 			doc
 				.off(hideOnClick)
@@ -387,14 +389,14 @@ $.extend(Popbox.prototype, {
 
 				// Remove loading indicator
 				popbox.loader.detach();
-				
+
 				var tooltip = $.buildHTML(html);
 
 				if (tooltip.filter("[data-popbox-tooltip]").length < 1) {
 
 					var content = tooltip;
 
-					tooltip = 
+					tooltip =
 						// Create wrapper and
 						$('<div class="popbox" data-popbox-tooltip><div class="arrow"></div><div class="popbox-content" data-popbox-content></div></div>')
 							.attr({
@@ -424,9 +426,9 @@ $.extend(Popbox.prototype, {
 							// to assign it back as our variable
 							.filter("[data-popbox-tooltip]");
 				}
-				
+
 				// Store tooltip property in popbox
-				popbox.tooltip = 
+				popbox.tooltip =
 					tooltip
 						// and let tooltip has a reference back to popbox
 						.data("popbox", popbox)
@@ -489,7 +491,7 @@ $.extend(Popbox.prototype, {
 
 // Data API
 $(document)
-	.on('click.popbox', '[data-popbox]', function(){
+	.on(Popbox.toggleEvent + '.popbox', '[data-popbox]', function(){
 
 		var popbox = $(this).popbox("widget");
 
