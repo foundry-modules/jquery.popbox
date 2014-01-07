@@ -99,7 +99,7 @@ var Popbox = function(button, options) {
 			Popbox.defaultOptions,
 			{
 				tooltip: $(),
-				loader : $('<div class="popbox loading" data-popbox-tooltip><div class="arrow"></div></div>'),
+				loader : $('<div id="fd" class="popbox loading" data-popbox-tooltip><div class="arrow"></div></div>'),
 				uid    : $.uid(),
 				button : button
 			},
@@ -398,7 +398,7 @@ $.extend(Popbox.prototype, {
 
 					tooltip =
 						// Create wrapper and
-						$('<div class="popbox" data-popbox-tooltip><div class="arrow"></div><div class="popbox-content" data-popbox-content></div></div>')
+						$('<div id="fd" class="popbox" data-popbox-tooltip><div class="arrow"></div><div class="popbox-content" data-popbox-content></div></div>')
 							.attr({
 								"id": popbox.id,
 								"data-popbox-tooltip": popbox.type
