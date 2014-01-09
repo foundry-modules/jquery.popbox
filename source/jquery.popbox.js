@@ -336,6 +336,21 @@ $.extend(Popbox.prototype, {
 				});
 		}
 
+		// Reposition popbox when browser resized or zoomed
+		var win = $(window),
+			repositionOnResize = "resize.popbox" + popbox.uid;
+
+		win
+			.off(repositionOnResize)
+			.on(repositionOnResize, function(){
+
+				// Reposition popbox
+				if (popbox.tooltip.length > 0) {
+					popbox.tooltip
+						.position(popbox.position);
+				}
+			});
+
 		// If tooltip exists, just show tootip
 		if (popbox.tooltip.length > 0) {
 
@@ -468,6 +483,9 @@ $.extend(Popbox.prototype, {
 			// Detach tooltip
 			popbox.tooltip
 				.detach();
+
+			// Detach repositionOnResize
+			$(window).off("resize.popbox" + popbox.uid);
 
 			// Trigger popboxDeactivate event
 			popbox.trigger("popboxDeactivate", [popbox]);
