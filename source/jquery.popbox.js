@@ -268,6 +268,7 @@ $.extend(Popbox.prototype, {
 				"id": popbox.id,
 				"data-popbox-tooltip": popbox.type
 			})
+			.addClass(popbox.component)
 			.addClass("popbox-" + popbox.type);
 
 		// If popbox is enabled, show tooltip with new options.
@@ -403,6 +404,7 @@ $.extend(Popbox.prototype, {
 								"id": popbox.id,
 								"data-popbox-tooltip": popbox.type
 							})
+							.addClass(popbox.component)
 							.addClass("popbox-" + popbox.type)
 							// append to body first because
 							.appendTo("body");
