@@ -73,19 +73,14 @@ var Popbox = function(button, options) {
 
 	// Gather element options
 	var elementOptions = {},
-		content   = button.attr("data-popbox"),
-		toggle    = button.attr("data-popbox-toggle"),
-		position  = button.attr("data-popbox-position"),
-		collision = button.attr("data-popbox-collision"),
-		type      = button.attr("data-popbox-type"),
-		id        = button.attr("data-popbox-id");
+		content = button.attr("data-popbox");
+		if (content) elementOptions.content = content;
 
-	if (content)   elementOptions.content   = content;
-	if (toggle)    elementOptions.toggle    = toggle;
-	if (type)      elementOptions.type      = type;
-	if (position)  elementOptions.position  = position;
-	if (collision) elementOptions.collision = collision;
-	if (id)        elementOptions.id        = id;
+	$(["id", "component", "type", "toggle", "position", "collision"])
+		.each(function(i, key){
+			var val = button.attr("data-popbox-" + key);
+			elementOptions[key] = val;
+		});
 
 	// If popbox was set up via jQuery, the element may not
 	// have the data-popbox attribute. We need this attribute
