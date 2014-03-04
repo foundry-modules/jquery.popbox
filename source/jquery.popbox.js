@@ -71,6 +71,21 @@ var Popbox = function(button, options) {
 		options = {content: options}
 	}
 
+	if (!options) {
+		options = {};
+	}
+
+	// Popbox button that is placed in a
+	// fixed position needs special handling.
+	button.parentsUntil("body").addBack()
+		.each(function(){
+			var parent = $(this);
+			if (parent.css("position")==="fixed") {
+				options.fixed = true;
+				return false;
+			}
+		});
+
 	// Gather element options
 	var elementOptions = {},
 		content = button.attr("data-popbox");
@@ -118,7 +133,9 @@ Popbox.defaultOptions = {
 	toggle: "hover",
 	position: "bottom",
 	collision: "flip",
-	cache: true
+	cache: true,
+	fixed: false,
+	offset: 0
 };
 
 Popbox.get = function(el) {
@@ -218,7 +235,8 @@ $.extend(Popbox.prototype, {
 					var tooltip   = $(this),
 						classname = popbox.position.classname,
 						top       = coords.top,
-						left      = coords.left;
+						left      = coords.left,
+						offset    = 0;
 
 					switch (pos[0]) {
 
@@ -228,7 +246,7 @@ $.extend(Popbox.prototype, {
 							if (vertical==pos[0]) {
 								classname = classname.replace(/top|bottom/gi, (vertical=="top") ? "bottom" : "top");
 							}
-							top = (vertical=="top") ? top + 10 : top - 10;
+							top = (vertical=="top") ? top + offset : top - offset;
 							break;
 
 						case "left":
@@ -237,7 +255,7 @@ $.extend(Popbox.prototype, {
 							if (feedback.horizontal==pos[0]) {
 								classname = classname.replace(/left|right/gi, (feedback.horizontal=="left") ? "right" : "left");
 							}
-							left = (horizontal=="left") ? left + 10 : left - 10;
+							left = (horizontal=="left") ? left + offset : left - offset;
 							break;
 					}
 
@@ -261,7 +279,8 @@ $.extend(Popbox.prototype, {
 		popbox.loader
 			.attr({
 				"id": popbox.id,
-				"data-popbox-tooltip": popbox.type
+				"data-popbox-tooltip": popbox.type,
+				"style": popbox.fixed ? 'position: fixed' : ''
 			})
 			.addClass(popbox.component)
 			.addClass("popbox-" + popbox.type);
@@ -383,6 +402,9 @@ $.extend(Popbox.prototype, {
 			popbox.loader
 				.appendTo("body")
 				.position(popbox.position);
+
+			// Trigger popboxLoading event
+			popbox.trigger("popboxLoading", [popbox]);
 		}
 
 		popbox.content
@@ -412,7 +434,8 @@ $.extend(Popbox.prototype, {
 						$('<div id="fd" class="popbox" data-popbox-tooltip><div class="arrow"></div><div class="popbox-content" data-popbox-content></div></div>')
 							.attr({
 								"id": popbox.id,
-								"data-popbox-tooltip": popbox.type
+								"data-popbox-tooltip": popbox.type,
+								"style": popbox.fixed ? 'position: fixed' : ''
 							})
 							.addClass(popbox.component)
 							.addClass("popbox-" + popbox.type)
