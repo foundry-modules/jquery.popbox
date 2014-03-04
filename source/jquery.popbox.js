@@ -135,7 +135,7 @@ Popbox.defaultOptions = {
 	collision: "flip",
 	cache: true,
 	fixed: false,
-	offset: 0
+	offset: 10
 };
 
 Popbox.get = function(el) {
@@ -236,7 +236,7 @@ $.extend(Popbox.prototype, {
 						classname = popbox.position.classname,
 						top       = coords.top,
 						left      = coords.left,
-						offset    = 0;
+						offset    = popbox.offset;
 
 					switch (pos[0]) {
 
