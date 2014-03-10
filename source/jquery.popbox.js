@@ -236,7 +236,8 @@ $.extend(Popbox.prototype, {
 						classname = popbox.position.classname,
 						top       = coords.top,
 						left      = coords.left,
-						offset    = popbox.offset;
+						offset    = popbox.offset,
+						buttonOffset = popbox.button.offset();
 
 					switch (pos[0]) {
 
@@ -247,6 +248,10 @@ $.extend(Popbox.prototype, {
 								classname = classname.replace(/top|bottom/gi, (vertical=="top") ? "bottom" : "top");
 							}
 							top = (vertical=="top") ? top + offset : top - offset;
+
+							if (left < Math.floor(buttonOffset.left)) {
+								classname = classname.replace(/left|right/gi, (pos[1]=="left") ? "right" : "left");
+							}
 							break;
 
 						case "left":
