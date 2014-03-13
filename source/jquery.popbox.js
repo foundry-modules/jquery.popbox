@@ -249,7 +249,7 @@ $.extend(Popbox.prototype, {
 							}
 							top = (vertical=="top") ? top + offset : top - offset;
 
-							if (left < Math.floor(buttonOffset.left)) {
+							if (pos[1]=="left" && (left < Math.floor(buttonOffset.left))) {
 								classname = classname.replace(/left|right/gi, (pos[1]=="left") ? "right" : "left");
 							}
 							break;
