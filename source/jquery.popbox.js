@@ -89,7 +89,7 @@ var Popbox = function(button, options) {
 	// Gather element options
 	var elementOptions = {},
 		// Takes content from data-popbox attribute, else take it from inline content.
-		content = button.attr("data-popbox") || button.find("[data-popbox-content]").html();
+		content = button.attr("data-popbox") || button.find("[data-popbox-content]").html() || $(button.attr("data-popbox-target")).html();
 		if (content) elementOptions.content = content;
 
 	$(["id", "component", "type", "toggle", "position", "collision"])
