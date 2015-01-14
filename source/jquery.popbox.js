@@ -98,6 +98,11 @@ var Popbox = function(button, options) {
 			elementOptions[key] = val;
 		});
 
+	// Quick Hack
+	if (button.attr("data-popbox-offset")!==undefined) {
+		elementOptions["offset"] = parseInt(button.attr("data-popbox-offset"));
+	}
+
 	// If popbox was set up via jQuery, the element may not
 	// have the data-popbox attribute. We need this attribute
 	// for click and hover events to work (and keep things DRY).

@@ -1,6 +1,4 @@
-@import "@{global}/popbox/variables";
-@import "@{component}/popbox/variables";
-@import "@{site}/popbox/variables";
+@import "popbox/variables";
 
 .popbox() {
 
@@ -15,9 +13,10 @@
 	background: @popboxBackground;
 	.getContrast(@popboxBackground); //contrast font color base on background color
 	border: 1px solid #ccc;
-	border: 1px solid rgba(0,0,0,.2);
+	border: 1px solid @popboxBorder;
 	border-radius: 6px;
-	.box-shadow(0 5px 10px rgba(0,0,0,.2));
+	.box-shadow(@popboxBoxShadow);
+
 
 	// Text formatting
 	white-space: normal;
