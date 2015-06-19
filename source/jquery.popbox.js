@@ -337,6 +337,9 @@ $.extend(Popbox.prototype, {
 			});
 		}
 
+		// Insert active for button
+		popbox.button.addClass("active");
+
 		// Hide when popbox is blurred
 		if (popbox.toggle=="click") {
 
@@ -523,6 +526,9 @@ $.extend(Popbox.prototype, {
 				popbox.destroy();
 			}
 		}
+
+		// Removed active for button
+		popbox.button.removeClass("active");
 
 		popbox.hideTimer = setTimeout(hide, popbox.hideDelay);
 	},
